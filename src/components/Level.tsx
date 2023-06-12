@@ -1,4 +1,3 @@
-import { Box } from "@react-three/drei";
 import { useFrame, useLoader } from "@react-three/fiber";
 import { useControls } from "leva";
 import { MutableRefObject, useMemo, useRef } from "react";
@@ -6,15 +5,18 @@ import { Mesh, Vector3 } from "three";
 import { GLTFLoader } from "three-stdlib";
 // @ts-ignore
 import { Pathfinding } from "three-pathfinding";
+import { Suspense } from "react";
 import Model from "./Model";
 
 const Level = ({
   pathToLevel,
+  pathToCharacter,
   pathToMesh,
   zone,
 }: {
   pathToLevel: string;
   pathToMesh: string;
+  pathToCharacter: string;
   zone: string;
 }) => {
   let options = {
@@ -23,6 +25,7 @@ const Level = ({
       y: 1,
       z: 40,
       speed: 1.3,
+      rotationSpeed: 0.05,
     },
     light: {
       intensity: 0.13,
@@ -39,6 +42,7 @@ const Level = ({
     y: { value: options.character.y, min: -100, max: 100 },
     z: { value: options.character.z, min: -100, max: 100 },
     speed: { value: options.character.speed, min: 0, max: 10 },
+    rotationSpeed: { value: options.character.rotationSpeed, min: 0, max: 1 },
   });
   levaOptions.light = useControls("Light", {
     intensity: { value: 0.3, min: 0, max: 1 },
@@ -52,7 +56,11 @@ const Level = ({
   }
 
   const character = useRef<Mesh>(null);
+  const map = useRef<Mesh>(null);
+
   let path: Vector3[] | MutableRefObject<null> = useRef(null);
+
+  let lookAtVector: MutableRefObject<Vector3> = useRef(new Vector3(0, 0, 0));
 
   const pathfinder = useMemo(() => new Pathfinding(), []);
 
@@ -88,10 +96,12 @@ const Level = ({
       return;
 
     let target = path[0];
-    // target.add(new Vector3(0, 1, 0));
+
     const distance = target.clone().sub(character.current?.position);
+
     if (distance.lengthSq() > 0.5) {
       distance.normalize();
+
       character.current.position.add(
         distance.multiplyScalar(speed * options.character.speed * 10)
       );
@@ -100,7 +110,19 @@ const Level = ({
     }
   }
 
-  useFrame((_, delta) => {
+  useFrame(({ raycaster }, delta) => {
+    if (!map.current || map.current?.children.length <= 0) return;
+
+    const mousePoint = raycaster.intersectObjects(map.current.children)[0];
+
+    if (mousePoint) {
+      lookAtVector.current = lookAtVector.current.lerp(
+        mousePoint.point,
+        options.character.rotationSpeed
+      );
+      character.current?.lookAt(lookAtVector.current);
+    }
+
     characterMove(delta);
   });
 
@@ -114,15 +136,27 @@ const Level = ({
 
   return (
     <>
-      <Model path={pathToLevel} />
-      <Box
+      <Model path={pathToLevel} wireframe={true} ref={map} />
+      <Suspense fallback={null}>
+        <Model
+          path={pathToCharacter}
+          position={[
+            options.character.x,
+            options.character.y,
+            options.character.z,
+          ]}
+          scale={1}
+          ref={character}
+        />
+      </Suspense>
+      {/* <Box
         position={[
           options.character.x,
           options.character.y,
           options.character.z,
         ]}
         ref={character}
-      />
+      /> */}
       <ambientLight intensity={options.light.intensity} />
       <primitive
         object={navmesh.scene}

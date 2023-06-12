@@ -33,6 +33,8 @@ export default function Experience() {
   const { camera } = useThree();
   camera.position.set(options.camera.x, options.camera.y, options.camera.z);
   useFrame(({ camera }) => {
+    if (options.camera.OrbitControls) return;
+
     camera.lookAt(
       new Vector3(
         options.camera.lookAtX,

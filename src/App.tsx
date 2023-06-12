@@ -21,6 +21,7 @@ const App = () => {
         />
         <Experience />
         <Level
+          pathToCharacter="./character.glb"
           pathToLevel="./street/street.glb"
           pathToMesh="./street/street-nav-mesh.glb"
           zone="street"
