@@ -13,7 +13,7 @@ const App = () => {
   }
   return (
     <div className="app">
-      <Leva collapsed />
+      <Leva collapsed hidden={!(window.location.hash === "#demo")} />
       <Canvas>
         <color
           args={[options.background as ColorRepresentation]}
