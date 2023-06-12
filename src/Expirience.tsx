@@ -1,4 +1,4 @@
-import { extend, useFrame, useLoader, useThree } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { Stats, OrbitControls } from "@react-three/drei";
 
 import { useControls } from "leva";
@@ -16,17 +16,19 @@ export default function Experience() {
       OrbitControls: false,
     },
   };
+  const levaOptions = { camera: {} } as typeof options;
 
+  levaOptions.camera = useControls("Camera", {
+    x: { value: options.camera.x, min: -100, max: 100 },
+    y: { value: options.camera.y, min: -100, max: 100 },
+    z: { value: options.camera.z, min: -100, max: 100 },
+    lookAtX: { value: options.camera.lookAtX, min: -100, max: 100 },
+    lookAtY: { value: options.camera.lookAtY, min: -100, max: 100 },
+    lookAtZ: { value: options.camera.lookAtZ, min: -100, max: 100 },
+    OrbitControls: options.camera.OrbitControls,
+  });
   if (window.location.hash === "#demo") {
-    options.camera = useControls("Camera", {
-      x: { value: options.camera.x, min: -100, max: 100 },
-      y: { value: options.camera.y, min: -100, max: 100 },
-      z: { value: options.camera.z, min: -100, max: 100 },
-      lookAtX: { value: options.camera.lookAtX, min: -100, max: 100 },
-      lookAtY: { value: options.camera.lookAtY, min: -100, max: 100 },
-      lookAtZ: { value: options.camera.lookAtZ, min: -100, max: 100 },
-      OrbitControls: options.camera.OrbitControls,
-    });
+    options = levaOptions;
   }
   const { camera } = useThree();
   camera.position.set(options.camera.x, options.camera.y, options.camera.z);

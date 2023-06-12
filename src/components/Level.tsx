@@ -29,20 +29,26 @@ const Level = ({
     },
     navigation: { showNavigationMesh: false },
   };
+  const levaOptions = {
+    character: {},
+    light: {},
+    navigation: {},
+  } as typeof options;
+  levaOptions.character = useControls("Character", {
+    x: { value: options.character.x, min: -100, max: 100 },
+    y: { value: options.character.y, min: -100, max: 100 },
+    z: { value: options.character.z, min: -100, max: 100 },
+    speed: { value: options.character.speed, min: 0, max: 10 },
+  });
+  levaOptions.light = useControls("Light", {
+    intensity: { value: 0.3, min: 0, max: 1 },
+  });
+  levaOptions.navigation = useControls("Navigation", {
+    showNavigationMesh: options.navigation.showNavigationMesh,
+  });
 
   if (window.location.hash === "#demo") {
-    options.character = useControls("Character", {
-      x: { value: options.character.x, min: -100, max: 100 },
-      y: { value: options.character.y, min: -100, max: 100 },
-      z: { value: options.character.z, min: -100, max: 100 },
-      speed: { value: options.character.speed, min: 0, max: 10 },
-    });
-    options.light = useControls("Light", {
-      intensity: { value: 0.3, min: 0, max: 1 },
-    });
-    options.navigation = useControls("Navigation", {
-      showNavigationMesh: options.navigation.showNavigationMesh,
-    });
+    options = levaOptions;
   }
 
   const character = useRef<Mesh>(null);
