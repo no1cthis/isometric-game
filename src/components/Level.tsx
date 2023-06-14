@@ -1,7 +1,7 @@
 import { useFrame, useLoader } from "@react-three/fiber";
 import { useControls } from "leva";
 import { MutableRefObject, useMemo, useRef } from "react";
-import { Group, Mesh, Vector3 } from "three";
+import { Clock, Group, Mesh, Vector3, Raycaster } from "three";
 import { GLTFLoader } from "three-stdlib";
 // @ts-ignore
 import { Pathfinding } from "three-pathfinding";
@@ -121,12 +121,9 @@ const Level = ({
     }
   }
 
-  useFrame(({ raycaster, clock }, delta) => {
-   
+  function moveSpotLight(clock:Clock, raycaster: Raycaster){
     if (!map.current || map.current?.children.length <= 0 || !character.current)
-      return;
-
-      // console.log(path.current)
+    return;
     const mousePoint = raycaster.intersectObjects(map.current.children)[0];
     if (mousePoint && spotLight.current) {
       const distance = mousePoint.point
@@ -159,6 +156,11 @@ const Level = ({
       spotLight.current.target.updateMatrixWorld();
       character.current?.lookAt(lookAtVector.current);
     }
+  }
+
+  useFrame(({ raycaster, clock }, delta) => {
+   
+    moveSpotLight(clock, raycaster)
 
     characterMove(delta);
   });
