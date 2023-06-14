@@ -12,7 +12,7 @@ export const options = {
     },
     navigation: { showNavigationMesh: false },
     spotLight: {
-      color: "#837f70",
+      color: "#c7cba1",
       x: 0,
       y: 0.75,
       z: 0.35,

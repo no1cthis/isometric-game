@@ -7,8 +7,21 @@ import { Mesh } from "three";
 const Model = forwardRef<Mesh, { path: string; [key: string]: any }>(
   (props, ref) => {
     const model = useLoader(GLTFLoader, props.path);
+    model.scene.traverse(mesh =>{
+      mesh.castShadow = true
+      mesh.receiveShadow = true
+    })
+    model.scene.castShadow = true
+    model.scene.receiveShadow = true
+    
 
-    return <group dispose={null}><primitive ref={ref} object={model.scene} wireframe {...props}  /> </group>;
+    return <group dispose={null}>
+      <primitive ref={ref} object={model.scene} {...props} /> 
+      {/* <mesh castShadow>
+            <bufferGeometry attach="geometry" {...model.nodes.} />
+            <meshStandardMaterial attach="material" {...mat} />
+        </mesh> */}
+      </group>;
   }
 );
 

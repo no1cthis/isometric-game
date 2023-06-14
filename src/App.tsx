@@ -22,7 +22,7 @@ const App = () => {
   return (
     <div className="app">
       <Leva collapsed hidden={!(window.location.hash === "#demo")} />
-      <Canvas>
+      <Canvas shadows>
         <color
           args={[options.background as ColorRepresentation]}
           attach="background"
