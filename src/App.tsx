@@ -36,14 +36,14 @@ const App = () => {
           pathToMesh="./street/street-nav-mesh.glb"
           zone={options.zone}
         />}
-{/* 
+
         {options.zone === "rooms" && <Level
           levelOptions={roomsLevelOptions}
           pathToCharacter="./character.glb"
           pathToLevel="./rooms/rooms.glb"
           pathToMesh="./rooms/rooms-nav-mesh.glb"
           zone={options.zone}
-        />} */}
+        />}
       </Canvas>
     </div>
   );

@@ -1,7 +1,7 @@
 import { useFrame, useLoader } from "@react-three/fiber";
 import { useControls } from "leva";
 import { MutableRefObject, useMemo, useRef } from "react";
-import { Clock, Group, Mesh, Vector3, Raycaster } from "three";
+import { Clock, Group, Mesh, Vector3, Raycaster, Intersection, Object3D } from "three";
 import { GLTFLoader } from "three-stdlib";
 // @ts-ignore
 import { Pathfinding } from "three-pathfinding";
@@ -62,9 +62,10 @@ const Level = ({
   const character = useRef<Group>(null);
   const spotLight = useRef(null);
   const map = useRef<Mesh>(null);
-
+  
+  let mouse = useRef<Intersection<Object3D<Event>>>(null);
+  let framesCount = useRef(0);
   let path = useRef<Vector3[]>([]);
-
   let lookAtVector: MutableRefObject<Vector3> = useRef(new Vector3(0, 0, 0));
 
   const pathfinder = useMemo(() => new Pathfinding(), []);
@@ -100,7 +101,6 @@ const Level = ({
       zone,
       groupId)
 
-      console.log(path.current)
   }
 
   function characterMove(speed: number) {
@@ -121,12 +121,12 @@ const Level = ({
     }
   }
 
-  function moveSpotLight(clock:Clock, raycaster: Raycaster){
+  function moveSpotLight(clock:Clock){
     if (!map.current || map.current?.children.length <= 0 || !character.current)
     return;
-    const mousePoint = raycaster.intersectObjects(map.current.children)[0];
-    if (mousePoint && spotLight.current) {
-      const distance = mousePoint.point
+    
+    if (mouse.current && spotLight.current) {
+      const distance = mouse.current.point
         .clone()
         .sub(character.current?.position)
         .lengthSq();
@@ -142,7 +142,7 @@ const Level = ({
         lookAtVector.current = lookAtVector.current.lerp(
           path.current.length > 0 && !levelOptions.character.watchOnCursorWhileMove
             ? path.current[0]
-            : mousePoint.point,
+            : mouse.current.point,
           levelOptions.character.rotationSpeed
         );
       }
@@ -158,9 +158,14 @@ const Level = ({
     }
   }
 
-  useFrame(({ raycaster, clock }, delta) => {
-   
-    moveSpotLight(clock, raycaster)
+  useFrame(({ raycaster, clock,  }, delta) => {
+    if(!map.current || !map.current.children) return
+
+    framesCount.current++
+   if(framesCount.current % 10 === 0)
+  //  @ts-ignore
+    mouse.current = raycaster.intersectObjects(map.current.children)[0];
+    moveSpotLight(clock)
 
     characterMove(delta);
   });
