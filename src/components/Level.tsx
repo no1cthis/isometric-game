@@ -53,6 +53,7 @@ const Level = ({
     angle: { value: levelOptions.spotLight.angle, min: 0, max: Math.PI },
     attenuation: { value: levelOptions.spotLight.attenuation, min: 0, max: 10 },
     anglePower: { value: levelOptions.spotLight.anglePower, min: 0, max: 100 },
+    shadowBias: levelOptions.spotLight.shadowBias
   });
 
   if (window.location.hash === "#demo") {
@@ -165,6 +166,7 @@ const Level = ({
    if(framesCount.current % 10 === 0)
   //  @ts-ignore
     mouse.current = raycaster.intersectObjects(map.current.children)[0];
+    if(framesCount.current % 2 === 0)
     moveSpotLight(clock)
 
     characterMove(delta);
@@ -204,7 +206,7 @@ const Level = ({
             angle={levelOptions.spotLight.angle}
             attenuation={levelOptions.spotLight.attenuation}
             anglePower={levelOptions.spotLight.anglePower}
-            shadow-bias={-0.00001}
+            shadow-bias={levelOptions.spotLight.shadowBias}
           />
           <Model path={pathToCharacter} />
         </group>

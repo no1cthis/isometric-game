@@ -12,7 +12,7 @@ export const options = {
     },
     navigation: { showNavigationMesh: false },
     spotLight: {
-      color: "#c7cba1",
+      color: "#8f9373",
       x: 0,
       y: 0.75,
       z: 0.35,
@@ -20,5 +20,6 @@ export const options = {
       angle: 0.5,
       attenuation: 0,
       anglePower: 1,
+      shadowBias: -0.00017
     },
   };

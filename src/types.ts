@@ -22,5 +22,6 @@ export type IOptionsLevel = {
         angle:number,
         attenuation: number,
         anglePower: number,
+        shadowBias:number,
     };
 }
