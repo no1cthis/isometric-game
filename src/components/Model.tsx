@@ -2,11 +2,12 @@ import React, { forwardRef, Ref } from "react";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
 import { useLoader } from "@react-three/fiber";
 import { Mesh } from "three";
+import { useGLTF } from "@react-three/drei";
 // import {  } from "@react-three/drei";
 
 const Model = forwardRef<Mesh, { path: string; [key: string]: any }>(
   (props, ref) => {
-    const model = useLoader(GLTFLoader, props.path);
+    const model = useGLTF(props.path);
     model.scene.traverse(mesh =>{
       mesh.castShadow = true
       mesh.receiveShadow = true
@@ -16,13 +17,11 @@ const Model = forwardRef<Mesh, { path: string; [key: string]: any }>(
     
 
     return <group dispose={null}>
-      <primitive ref={ref} object={model.scene} {...props} /> 
-      {/* <mesh castShadow>
-            <bufferGeometry attach="geometry" {...model.nodes.} />
-            <meshStandardMaterial attach="material" {...mat} />
-        </mesh> */}
+        <primitive ref={ref} object={model.scene} {...props} /> 
       </group>;
   }
 );
+
+useGLTF.preload("./rooms/rooms.glb")
 
 export default Model;

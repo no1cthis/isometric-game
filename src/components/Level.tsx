@@ -204,6 +204,7 @@ const Level = ({
             angle={levelOptions.spotLight.angle}
             attenuation={levelOptions.spotLight.attenuation}
             anglePower={levelOptions.spotLight.anglePower}
+            shadow-bias={-0.00001}
           />
           <Model path={pathToCharacter} />
         </group>

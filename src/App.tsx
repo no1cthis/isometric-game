@@ -5,6 +5,7 @@ import { options as streetLevelOptions } from "./level-options/street";
 import { options as roomsLevelOptions } from "./level-options/rooms";
 import Level from "./components/Level";
 import Experience from "./Expirience";
+import { useGLTF } from "@react-three/drei";
 
 const App = () => {
   let options = { background: "#201919", zone:"street" };
@@ -48,5 +49,7 @@ const App = () => {
     </div>
   );
 };
+
+
 
 export default App;
