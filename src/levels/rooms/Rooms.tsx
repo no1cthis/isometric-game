@@ -1,18 +1,29 @@
+import { useAnimations, useGLTF } from "@react-three/drei";
 import { useFrame, useThree } from "@react-three/fiber";
-import { useControls } from "leva";
-import { useRef } from "react";
-import { Group, Mesh, Vector3 } from "three";
+import { useEffect, useMemo, useRef } from "react";
+import {
+  AnimationAction,
+  BufferGeometry,
+  Group,
+  LoopOnce,
+  LoopRepeat,
+  Material,
+  Mesh,
+  Vector3,
+} from "three";
 
 import { options as levelOptions } from "./levelOptions";
+
+import * as THREE from "three";
 import ActionMark from "../../components/ActionMark";
 import Level from "../../components/Level";
 import { useCreateNavmesh } from "../../hooks/useCreateNavmesh";
-import { LevelName } from "../../types";
-
-import { findPath } from "../../utils/findPath";
+import { IOptionsLevel, LevelName } from "../../types";
 import { handlePointerOut, handlePointerOver } from "../../utils/pointer";
+import { useControls } from "leva";
+import { findPath } from "../../utils/findPath";
 
-const Street = ({
+const Rooms = ({
   pathToLevel,
   pathToCharacter,
   pathToMesh,
@@ -23,15 +34,15 @@ const Street = ({
   pathToMesh: string;
   pathToCharacter: string;
   changeLevel: (name: LevelName) => void;
-  zone: string;
+  zone: LevelName;
 }) => {
   let options = {
-    nextLevel: { x: -2, y: 8, z: 13 },
+    prevLevel: { x: 6, y: 3.7, z: 32.7 },
     navigation: { showNavigationMesh: false },
   };
-  let levaOptions = { nextLevel: {}, navigation: {} } as typeof options;
-  levaOptions.nextLevel = useControls("Next Level", {
-    ...options.nextLevel,
+  let levaOptions = { prevLevel: {}, navigation: {} } as typeof options;
+  levaOptions.prevLevel = useControls("Prev Level", {
+    ...options.prevLevel,
   });
   levaOptions.navigation = useControls("Navigation", {
     showNavigationMesh: levelOptions.navigation.showNavigationMesh,
@@ -40,26 +51,39 @@ const Street = ({
     options = levaOptions;
   }
 
-  const character = useRef<Group>(null);
-  const NextLevelMark = useRef<Mesh>(null);
+  const door = useGLTF("rooms/door.glb");
+  const doorRef = useRef<Mesh>(null);
+
   let path = useRef<Vector3[]>([]);
   let framesCount = useRef(0);
+  const character = useRef<Group>(null);
+  const prevLevelMark = useRef<Mesh>(null);
 
-  const { navmesh, pathfinder } = useCreateNavmesh(pathToMesh, zone);
+  const { actions } = useAnimations(door.animations, doorRef);
 
-  function nextLevel() {
-    if (!NextLevelMark.current) return;
+  function goToAnotherLevel(
+    actionMark: React.RefObject<Mesh<BufferGeometry, Material | Material[]>>,
+    zoneName: LevelName,
+    action: AnimationAction | null
+  ) {
+    if (!actionMark.current) return;
 
     path.current = findPath(
       pathfinder,
-      NextLevelMark.current.position,
+      actionMark.current.position,
       zone,
       character
     );
 
     const helper = () => {
       if (path.current.length === 0) {
-        changeLevel("rooms");
+        if (!action) return;
+        action.play();
+        action.loop = LoopOnce;
+
+        setTimeout(() => {
+          changeLevel(zoneName);
+        }, 2000);
         return;
       }
       requestAnimationFrame(helper);
@@ -67,6 +91,16 @@ const Street = ({
 
     helper();
   }
+
+  useEffect(() => {
+    if (!character.current) return;
+    character.current?.position.set(
+      levelOptions.character.x,
+      levelOptions.character.y,
+      levelOptions.character.z
+    );
+  }, []);
+  const { navmesh, pathfinder } = useCreateNavmesh(pathToMesh, zone);
 
   function onClickMesh(event: any) {
     const target = event.intersections[0].point;
@@ -76,10 +110,9 @@ const Street = ({
   useFrame(({ camera }) => {
     framesCount.current++;
     if (framesCount.current % 30 === 0) {
-      NextLevelMark.current?.lookAt(camera.position);
+      prevLevelMark.current?.lookAt(camera.position);
     }
   });
-
   return (
     <>
       <Level
@@ -107,17 +140,22 @@ const Street = ({
 
       <ActionMark
         position={[
-          options.nextLevel.x,
-          options.nextLevel.y,
-          options.nextLevel.z,
+          options.prevLevel.x,
+          options.prevLevel.y,
+          options.prevLevel.z,
         ]}
+        ref={prevLevelMark}
+        onClick={() => {
+          goToAnotherLevel(prevLevelMark, "street", actions["opening"]);
+        }}
         onPointerOver={handlePointerOver}
         onPointerOut={handlePointerOut}
-        ref={NextLevelMark}
-        onClick={nextLevel}
       />
+      <group dispose={null}>
+        <primitive ref={doorRef} object={door.scene} />
+      </group>
     </>
   );
 };
 
-export default Street;
+export default Rooms;

@@ -1,15 +1,18 @@
 import { Canvas } from "@react-three/fiber";
 import { Leva, useControls } from "leva";
 import { ColorRepresentation } from "three";
-import { options as streetLevelOptions } from "./level-options/street";
-import { options as roomsLevelOptions } from "./level-options/rooms";
-import Level from "./components/Level";
+
 import Experience from "./Expirience";
-import { useGLTF } from "@react-three/drei";
+
 import Street from "./levels/street/Street";
-import Rooms from "./levels/street/Rooms";
+import Rooms from "./levels/rooms/Rooms";
+import { useEffect, useState } from "react";
+import { LevelName } from "./types";
+import { OrthographicCamera, PerspectiveCamera } from "@react-three/drei";
 
 const App = () => {
+  const [zone, setZone] = useState("street");
+
   let options = { background: "#201919", zone: "street" };
   const levaOptions = useControls({
     background: options.background,
@@ -22,6 +25,14 @@ const App = () => {
     options = levaOptions;
   }
 
+  useEffect(() => {
+    setZone(options.zone);
+  }, [options.zone]);
+
+  const changeLevel = (name: LevelName) => {
+    setZone(name);
+  };
+
   return (
     <div className="app">
       <Leva collapsed hidden={!(window.location.hash === "#demo")} />
@@ -32,23 +43,23 @@ const App = () => {
         />
         <Experience />
 
-        {options.zone === "street" && (
+        {zone === "street" && (
           <Street
-            levelOptions={streetLevelOptions}
             pathToCharacter="./character.glb"
             pathToLevel="./street/street.glb"
             pathToMesh="./street/street-nav-mesh.glb"
-            zone={options.zone}
+            zone={zone}
+            changeLevel={changeLevel}
           />
         )}
 
-        {options.zone === "rooms" && (
+        {zone === "rooms" && (
           <Rooms
-            levelOptions={streetLevelOptions}
             pathToCharacter="./character.glb"
             pathToLevel="./rooms/rooms.glb"
             pathToMesh="./rooms/rooms-nav-mesh.glb"
-            zone={options.zone}
+            zone={zone}
+            changeLevel={changeLevel}
           />
         )}
       </Canvas>

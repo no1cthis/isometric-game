@@ -1,6 +1,6 @@
-import { forwardRef, useRef } from "react";
+import { forwardRef } from "react";
 import * as THREE from "three";
-import { useAnimations, useGLTF } from "@react-three/drei";
+import { useGLTF } from "@react-three/drei";
 // import {  } from "@react-three/drei";
 
 const Model = forwardRef<THREE.Mesh, { path: string; [key: string]: any }>(
@@ -12,7 +12,6 @@ const Model = forwardRef<THREE.Mesh, { path: string; [key: string]: any }>(
       if (/withShadow/.test(node.name)) shadow = true;
 
       node.receiveShadow = true;
-
       if (shadow) node.castShadow = true;
     });
 

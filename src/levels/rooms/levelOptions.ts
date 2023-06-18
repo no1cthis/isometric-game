@@ -6,9 +6,9 @@ export const options = {
     speed: 0.025
   },
     character: {
-      x: 12,
-      y: 2,
-      z: -2,
+      x: 6,
+      y: 1,
+      z: 30,
       speed: 1.3,
       rotationSpeed: 0.05,
       watchOnCursorWhileMove: true,

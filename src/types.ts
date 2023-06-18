@@ -1,3 +1,5 @@
+export type LevelName = "street" | "rooms" | "laboratory";
+
 export type IOptionsLevel = {
     camera: {
         x: number,
