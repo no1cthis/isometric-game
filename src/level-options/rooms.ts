@@ -1,4 +1,10 @@
 export const options = {
+  camera: {
+    x: 8,
+    y: 14,
+    z: 14,
+    speed: 0.025
+  },
     character: {
       x: 12,
       y: 2,
@@ -20,6 +26,6 @@ export const options = {
       angle: 0.5,
       attenuation: 0,
       anglePower: 1,
-      shadowBias: -0.01
+      shadowBias: -0.001
     },
   };

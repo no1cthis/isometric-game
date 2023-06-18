@@ -1,35 +1,29 @@
-import React, { forwardRef, Ref, useEffect, useRef } from "react";
-import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader";
-import { useLoader } from "@react-three/fiber";
+import { forwardRef, useRef } from "react";
 import * as THREE from "three";
 import { useAnimations, useGLTF } from "@react-three/drei";
 // import {  } from "@react-three/drei";
 
-const Model = forwardRef<THREE.Mesh, { path: string, [key: string]: any }>(
+const Model = forwardRef<THREE.Mesh, { path: string; [key: string]: any }>(
   (props, ref) => {
-    const otherRef = useRef(null)
     const model = useGLTF(props.path);
+    let shadow = true;
+    model.scene.traverse((node) => {
+      if (/noShadow/.test(node.name)) shadow = false;
+      if (/withShadow/.test(node.name)) shadow = true;
 
-    const {actions, mixer} = useAnimations(model.animations, otherRef)
+      node.receiveShadow = true;
 
-    useEffect(() => {
-      console.log(model.animations)
-     const animation = actions["opening"];
-     if(animation){
-       animation.clampWhenFinished = true;
-       animation.loop = THREE.LoopOnce;
-      animation.play()
-    }
-    }, [mixer]);
-    
-    // console.log(model.animations[0])
+      if (shadow) node.castShadow = true;
+    });
 
-    return <group dispose={null} ref={otherRef}>
-        <primitive ref={ref}  object={model.scene} {...props} /> 
-      </group>;
+    return (
+      <group dispose={null}>
+        <primitive ref={ref} object={model.scene} {...props} />
+      </group>
+    );
   }
 );
 
-useGLTF.preload("./rooms/rooms.glb")
+useGLTF.preload("./rooms/rooms.glb");
 
 export default Model;

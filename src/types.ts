@@ -1,4 +1,10 @@
 export type IOptionsLevel = {
+    camera: {
+        x: number,
+        y: number,
+        z: number,
+        speed: number
+      }
     character: {
         x: number;
         y: number;

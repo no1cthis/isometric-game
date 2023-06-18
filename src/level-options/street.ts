@@ -1,4 +1,10 @@
 export const options = {
+  camera: {
+    x: 8,
+    y: 14,
+    z: 14,
+    speed: 0.025
+  },
     character: {
       x: 0,
       y: 1,
