@@ -41,7 +41,7 @@ const App = () => {
         {options.zone === "rooms" && <Level
           levelOptions={roomsLevelOptions}
           pathToCharacter="./character.glb"
-          pathToLevel="./rooms/rooms.glb"
+          pathToLevel="./rooms/rooms.gltf"
           pathToMesh="./rooms/rooms-nav-mesh.glb"
           zone={options.zone}
         />}

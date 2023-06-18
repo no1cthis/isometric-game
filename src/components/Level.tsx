@@ -1,6 +1,6 @@
 import { useFrame, useLoader } from "@react-three/fiber";
 import { useControls } from "leva";
-import { MutableRefObject, useMemo, useRef } from "react";
+import { MutableRefObject, Suspense, useMemo, useRef } from "react";
 import { Clock, Group, Mesh, Vector3, Raycaster, Intersection, Object3D } from "three";
 import { GLTFLoader } from "three-stdlib";
 // @ts-ignore
@@ -8,6 +8,7 @@ import { Pathfinding } from "three-pathfinding";
 import Model from "./Model";
 import { SpotLight } from "@react-three/drei";
 import { IOptionsLevel } from "../types";
+import ActionMark from "./ActionMark";
 
 const Level = ({
   levelOptions,
@@ -63,6 +64,8 @@ const Level = ({
   const character = useRef<Group>(null);
   const spotLight = useRef(null);
   const map = useRef<Mesh>(null);
+
+  const mark = useRef<Mesh>(null)
   
   let mouse = useRef<Intersection<Object3D<Event>>>(null);
   let framesCount = useRef(0);
@@ -82,7 +85,9 @@ const Level = ({
 
   function onClickMesh(event: any) {
     const target = event.intersections[0].point;
+    
   
+
     const groupId = pathfinder.getGroup(zone, character.current?.position);
     const closestTarget = pathfinder.getClosestNode(target, zone, groupId);
     const closestCharacter = pathfinder.getClosestNode(
@@ -90,22 +95,16 @@ const Level = ({
       zone,
       groupId
     );
-    // console.log(path.current)
+
     path.current = pathfinder.findPath(
       closestCharacter.centroid,
       closestTarget.centroid,
       zone,
       groupId
     );
-    console.log( closestCharacter.centroid,
-      closestTarget.centroid,
-      zone,
-      groupId)
-
   }
 
   function characterMove(speed: number) {
-    // console.log(path.current)
     if (!path.current || path.current.length <= 0 || !character.current) return;
 
     let target = path.current[0];
@@ -123,7 +122,7 @@ const Level = ({
   }
 
   function moveSpotLight(clock:Clock){
-    if (!map.current || map.current?.children.length <= 0 || !character.current)
+    if (!map.current || map.current?.children.length <= 0 || !character.current || !path.current)
     return;
     
     if (mouse.current && spotLight.current) {
@@ -131,8 +130,8 @@ const Level = ({
         .clone()
         .sub(character.current?.position)
         .lengthSq();
-
-      if (distance < 4) {
+        // ||( character.current.position.y - mouse.current.point.y > 2 && path.current.length <=0)
+      if (distance < 4 ) {
         lookAtVector.current = lookAtVector.current.lerp(
           lookAtVector.current.add(
             new Vector3(0, Math.sin(clock.elapsedTime * 3) / 100, 0)
@@ -159,7 +158,7 @@ const Level = ({
     }
   }
 
-  useFrame(({ raycaster, clock,  }, delta) => {
+  useFrame(({ raycaster, clock,  camera}, delta) => {
     if(!map.current || !map.current.children) return
 
     framesCount.current++
@@ -168,8 +167,10 @@ const Level = ({
     mouse.current = raycaster.intersectObjects(map.current.children)[0];
     if(framesCount.current % 2 === 0)
     moveSpotLight(clock)
-
     characterMove(delta);
+
+    if(mark.current)
+      mark.current.lookAt(camera.position)
   });
 
   function handlePointerOver() {
@@ -182,7 +183,10 @@ const Level = ({
 
   return (
     <>
-      <Model path={pathToLevel} ref={map}/>
+    <Suspense fallback={null}>
+      <Model path={pathToLevel} ref={map} />
+    </Suspense>
+
 
         <group
           name="character"
@@ -208,7 +212,7 @@ const Level = ({
             anglePower={levelOptions.spotLight.anglePower}
             shadow-bias={levelOptions.spotLight.shadowBias}
           />
-          <Model path={pathToCharacter} />
+          <Model path={pathToCharacter} position={[0,0.5,0]}/>
         </group>
 
 
@@ -221,6 +225,7 @@ const Level = ({
         visible={levelOptions.navigation.showNavigationMesh}
         style={{ cursor: "pointer" }}
       />
+      <ActionMark position={[0, 6, 40]} ref={mark} transparent/>
     </>
   );
 };
